@@ -3,11 +3,11 @@ import time
 
 import pygame
 
-from Logic import solution_time
+from NguyenNgocThaiBao_23110180_tuan13_code_logic import solution_time
 
-WINDOW_WIDTH = 500
+WINDOW_WIDTH = 640
 WINDOW_HEIGHT = 600
-PUZZLE_AREA_HEIGHT = 300
+PUZZLE_AREA_HEIGHT = 250
 
 WHITE = (255, 255, 255)
 BLACK = (0, 0, 0)
@@ -27,10 +27,10 @@ TILE_SIZE = 60
 PUZZLE_WIDTH = TILE_SIZE * 3
 PUZZLE_HEIGHT = TILE_SIZE * 3
 
-LEFT_PUZZLE_OFFSET = (50, 20)
-LEFT_TEXT = (100, 200)
-RIGHT_PUZZLE_OFFSET = (270, 20)
-RIGHT_TEXT = (320, 200)
+LEFT_PUZZLE_OFFSET = (127, 20)
+LEFT_TEXT = (177, 200)
+RIGHT_PUZZLE_OFFSET = (347, 20)
+RIGHT_TEXT = (397, 200)
 CENTER_PUZZLE_OFFSET = (140, 20)
 
 
@@ -212,24 +212,217 @@ def animate_solution(solution, slider, time_solved):
             clock.tick(60)
 
 
+def partial_belief_interface(steps, goal_states, time_solved):
+    running = True
+    step_idx = 0
+    max_step = len(steps) - 1
+    belief_scroll = 0
+    goal_scroll = 0
+    BELIEF_SHOW = 5
+    GOAL_SHOW = 5
+    SMALL_TILE = 32
+    SMALL_PUZZLE = SMALL_TILE * 3
+    BELIEF_X = 40
+    BELIEF_Y = 40
+    GOAL_X = 400
+    GOAL_Y = 40
+    SPACE_Y = 10
+    btn_back = Button((WINDOW_WIDTH // 2 - 70, PUZZLE_AREA_HEIGHT + 40, 100, 40), "Back")
+    btn_step_left = Button((WINDOW_WIDTH // 2 - 100, PUZZLE_AREA_HEIGHT + 100, 40, 40), "<")
+    btn_step_right = Button((WINDOW_WIDTH // 2 + 20, PUZZLE_AREA_HEIGHT + 100, 40, 40), ">")
+    btn_belief_up = Button((BELIEF_X + SMALL_PUZZLE + 10, BELIEF_Y, 50, 30), "Up")
+    btn_belief_down = Button((BELIEF_X + SMALL_PUZZLE + 10, BELIEF_Y + 40, 50, 30), "Down")
+    btn_goal_up = Button((GOAL_X - 60, GOAL_Y, 50, 30), "Up")
+    btn_goal_down = Button((GOAL_X - 60, GOAL_Y + 40, 50, 30), "Down")
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                return
+            if btn_back.is_clicked(event):
+                return
+            if btn_step_left.is_clicked(event):
+                step_idx = max(0, step_idx - 1)
+                belief_scroll = 0
+                goal_scroll = 0
+            if btn_step_right.is_clicked(event):
+                step_idx = min(max_step, step_idx + 1)
+                belief_scroll = 0
+                goal_scroll = 0
+            if btn_belief_up.is_clicked(event):
+                belief_scroll = max(0, belief_scroll - 1)
+            if btn_belief_down.is_clicked(event):
+                if belief_scroll + BELIEF_SHOW < len(steps[step_idx]):
+                    belief_scroll += 1
+            if btn_goal_up.is_clicked(event):
+                goal_scroll = max(0, goal_scroll - 1)
+            if btn_goal_down.is_clicked(event):
+                if goal_scroll + GOAL_SHOW < len(goal_states):
+                    goal_scroll += 1
+
+        screen.fill(WHITE)
+        for i in range(BELIEF_SHOW):
+            idx = belief_scroll + i
+            if idx >= len(steps[step_idx]):
+                break
+            draw_puzzle(screen, steps[step_idx][idx], offset=(BELIEF_X, BELIEF_Y + i * (SMALL_PUZZLE + SPACE_Y)), tile_size=SMALL_TILE)
+        for i in range(GOAL_SHOW):
+            idx = goal_scroll + i
+            if idx >= len(goal_states):
+                break
+            draw_puzzle(screen, goal_states[idx], offset=(GOAL_X, GOAL_Y + i * (SMALL_PUZZLE + SPACE_Y)), tile_size=SMALL_TILE)
+        btn_belief_up.draw(screen)
+        btn_belief_down.draw(screen)
+        btn_goal_up.draw(screen)
+        btn_goal_down.draw(screen)
+        btn_step_left.draw(screen)
+        btn_step_right.draw(screen)
+        btn_back.draw(screen)
+        info = font_small.render(f"Step: {step_idx}/{max_step}   Time: {time_solved:.2f}s", True, BLACK)
+        screen.blit(info, (WINDOW_WIDTH // 2 - 100, PUZZLE_AREA_HEIGHT + 150))
+        pygame.display.flip()
+        clock.tick(60)
+
+
+def backtracking_interface(final_assignment, time_solved):
+    """
+    final_assignment: dictionary chứa lời giải cuối của backtracking
+                      (key: (row, col), value: số từ 0 đến 8, với 0 là ô trống)
+    Phiên bản này vẽ ra một puzzle nền xanh dương có viền đen,
+    ban đầu là puzzle rỗng, sau đó dần điền các số (ngoại trừ 0)
+    theo thứ tự các ô (theo sorted keys). Bên dưới hiển thị thông tin steps, time và nút Menu.
+    Nhấn ESC hoặc nút Menu để thoát về menu chính.
+    """
+    # Tạo danh sách các bước animation: ban đầu là puzzle rỗng, sau đó dần điền các ô theo thứ tự sorted key.
+    sorted_keys = final_assignment.keys()
+    steps = []  # mỗi phần tử là một assignment (dict) chứa dần các ô đã điền.
+    current_assignment = {}
+    steps.append(current_assignment.copy())  # bước 0: puzzle rỗng
+    for key in sorted_keys:
+        # Nếu final_assignment[key] khác 0 thì gán, còn nếu là 0 thì vẫn giữ ô trống.
+        if final_assignment[key] != 0:
+            current_assignment[key] = final_assignment[key]
+        else:
+            current_assignment[key] = 0
+        steps.append(current_assignment.copy())
+    total_steps = len(steps) - 1
+
+    # Nút Menu để quay lại menu chính
+    btn_menu = Button((WINDOW_WIDTH - 120, PUZZLE_HEIGHT + 20, 100, 40), "Menu")
+
+    # Vị trí hiển thị puzzle: ở phía trên (centering theo chiều ngang)
+    board_x = WINDOW_WIDTH // 2 - PUZZLE_WIDTH // 2
+    board_y = 40  # cách trên màn hình 40 pixel
+
+    # Hàm vẽ puzzle nền xanh dương với viền đen
+    def draw_puzzle_blue(surface, state, offset=(0, 0), tile_size=TILE_SIZE):
+        x_offset, y_offset = offset
+        # Vẽ nền xanh cho toàn puzzle
+        pygame.draw.rect(surface, BLUE, (x_offset, y_offset, PUZZLE_WIDTH, PUZZLE_HEIGHT))
+        # Vẽ từng ô; nếu số khác 0 thì in số (với màu chữ trắng), còn nếu = 0 thì chỉ vẽ viền.
+        for i in range(3):
+            for j in range(3):
+                rect = pygame.Rect(x_offset + j * tile_size, y_offset + i * tile_size, tile_size, tile_size)
+                value = state[i][j]
+                if value != 0:
+                    # Vẽ ô có nền xanh (giữ nguyên màu nền) và in số trắng
+                    text = font_large.render(str(value), True, WHITE)
+                    text_rect = text.get_rect(center=rect.center)
+                    surface.blit(text, text_rect)
+                pygame.draw.rect(surface, BLACK, rect, 2)
+
+    running = True
+    step_idx = 0
+    delay = 0.8  # thời gian delay giữa các bước animation (giây)
+    last_update = time.time()
+
+    while running:
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                running = False
+                return
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    running = False
+                    return
+            if btn_menu.is_clicked(event):
+                return
+
+        # Tự động tiến animation sau khoảng delay
+        if time.time() - last_update >= delay and step_idx < total_steps:
+            step_idx += 1
+            last_update = time.time()
+
+        # Tái tạo state dựa trên assignment của bước hiện tại
+        state = [[0 for _ in range(3)] for _ in range(3)]
+        current_state_assignment = steps[step_idx]
+        for i in range(3):
+            for j in range(3):
+                if (i, j) in current_state_assignment:
+                    state[i][j] = current_state_assignment[(i, j)]
+
+        screen.fill(WHITE)
+        # Vẽ puzzle với nền xanh dương ở vị trí board_x, board_y
+        draw_puzzle_blue(screen, state, offset=(board_x, board_y))
+
+        # Vẽ thông tin bên dưới: step hiện tại và thời gian
+        info = font_small.render(f"Steps: {step_idx}/{total_steps}   Time: {time_solved:.2f}s", True, BLACK)
+        screen.blit(info, (50, PUZZLE_AREA_HEIGHT + 10))
+        # Vẽ nút Menu
+        btn_menu.draw(screen)
+        # Hướng dẫn (ESC hoặc Menu để thoát)
+        help_text = font_small.render("ESC or Menu", True, BLACK)
+        screen.blit(help_text, (50, PUZZLE_AREA_HEIGHT + 40))
+
+        pygame.display.flip()
+        clock.tick(60)
+
+
+def draw_puzzle(surface, state, offset=(0, 0), tile_size=TILE_SIZE):
+    x_offset, y_offset = offset
+    puzzle_width = tile_size * 3
+    puzzle_height = tile_size * 3
+    pygame.draw.rect(surface, WHITE, (x_offset, y_offset, puzzle_width, puzzle_height))
+    for i in range(3):
+        for j in range(3):
+            value = state[i][j]
+            rect = pygame.Rect(x_offset + j * tile_size, y_offset + i * tile_size, tile_size, tile_size)
+            if value != 0:
+                pygame.draw.rect(surface, BLUE, rect)
+                text = font_large.render(str(value), True, WHITE) if tile_size >= 40 else font_small.render(str(value), True, WHITE)
+                text_rect = text.get_rect(center=rect.center)
+                surface.blit(text, text_rect)
+            pygame.draw.rect(surface, BLACK, rect, 2)
+
+
 def main():
     global start_state
-    start_state = [[2, 6, 5], [8, 7, 0], [4, 3, 1]]
+    start_state = [[1, 2, 3], [4, 5, 6], [7, 0, 8]]
     goal_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
     algo_selected = None
     time_solved = 0
-    btn_bfs = Button((50, PUZZLE_AREA_HEIGHT + 20, 100, 40), "BFS")
-    btn_dfs = Button((200, PUZZLE_AREA_HEIGHT + 20, 100, 40), "DFS")
-    btn_ucs = Button((350, PUZZLE_AREA_HEIGHT + 20, 100, 40), "UCS")
-    btn_iddfs = Button((50, PUZZLE_AREA_HEIGHT + 70, 100, 40), "IDDFS")
-    btn_gbfs = Button((200, PUZZLE_AREA_HEIGHT + 70, 100, 40), "GBFS")
-    btn_Astar = Button((350, PUZZLE_AREA_HEIGHT + 70, 100, 40), "A*")
-    btn_ida_star = Button((50, PUZZLE_AREA_HEIGHT + 120, 100, 40), "IDA*")
-    btn_hill_simp = Button((200, PUZZLE_AREA_HEIGHT + 120, 100, 40), "H_SIMP")
-    btn_hill_step = Button((350, PUZZLE_AREA_HEIGHT + 120, 100, 40), "H_STEEP")
-    btn_hill_stocha = Button((50, PUZZLE_AREA_HEIGHT + 170, 100, 40), "H_STOR")
-    btn_random = Button((200, 250, 100, 40), "Random")
-    slider = Slider((50, PUZZLE_AREA_HEIGHT + 250, 250, 20), 0.01, 2.0, 1.0)
+    centerx, centery = screen.get_rect().center
+    btn_bfs = Button((50, PUZZLE_AREA_HEIGHT + 50, 100, 40), "BFS")
+    btn_dfs = Button((200, PUZZLE_AREA_HEIGHT + 50, 100, 40), "DFS")
+    btn_ucs = Button((350, PUZZLE_AREA_HEIGHT + 50, 100, 40), "UCS")
+    btn_part_belief = Button((500, PUZZLE_AREA_HEIGHT + 50, 100, 40), "Part_Belief")
+    btn_iddfs = Button((50, PUZZLE_AREA_HEIGHT + 100, 100, 40), "IDDFS")
+    btn_gbfs = Button((200, PUZZLE_AREA_HEIGHT + 100, 100, 40), "GBFS")
+    btn_Astar = Button((350, PUZZLE_AREA_HEIGHT + 100, 100, 40), "A*")
+    btn_backtrack = Button((500, PUZZLE_AREA_HEIGHT + 100, 100, 40), "BT")
+    btn_ida_star = Button((50, PUZZLE_AREA_HEIGHT + 150, 100, 40), "IDA*")
+    btn_hill_simp = Button((200, PUZZLE_AREA_HEIGHT + 150, 100, 40), "H_SIMP")
+    btn_hill_step = Button((350, PUZZLE_AREA_HEIGHT + 150, 100, 40), "H_STEEP")
+    btn_backtrack_cons = Button((500, PUZZLE_AREA_HEIGHT + 150, 100, 40), "BT_CONS")
+    btn_hill_stocha = Button((50, PUZZLE_AREA_HEIGHT + 200, 100, 40), "H_STOR")
+    btn_beam = Button((200, PUZZLE_AREA_HEIGHT + 200, 100, 40), "BEAM")
+    btn_sa = Button((350, PUZZLE_AREA_HEIGHT + 200, 100, 40), "SA")
+    btn_backtrack_heus = Button((500, PUZZLE_AREA_HEIGHT + 200, 100, 40), "BT_HEU")
+    btn_generic = Button((50, PUZZLE_AREA_HEIGHT + 250, 100, 40), "Generic")
+    btn_and_or = Button((200, PUZZLE_AREA_HEIGHT + 250, 100, 40), "And_Or")
+    btn_belief = Button((350, PUZZLE_AREA_HEIGHT + 250, 100, 40), "Belief")
+    btn_random = Button((277, PUZZLE_AREA_HEIGHT, 100, 40), "Random")
+    slider = Slider((50, PUZZLE_AREA_HEIGHT + 300, 250, 20), 0.01, 2.0, 1.0)
     running = True
     animating = False
     solution_solved = None
@@ -280,6 +473,66 @@ def main():
                 algo_selected = "HillClimbing_Stochastic"
                 solution_solved, time_solved = solution_time(start_state, "hill_stochastic")
                 animating = True
+            elif btn_beam.is_clicked(event):
+                algo_selected = "Beam"
+                solution_solved, time_solved = solution_time(start_state, "beam")
+                animating = True
+            elif btn_sa.is_clicked(event):
+                algo_selected = "simulated_annealing"
+                solution_solved, time_solved = solution_time(start_state, "simulated_annealing")
+                animating = True
+            elif btn_generic.is_clicked(event):
+                algo_selected = "generic"
+                solution_solved, time_solved = solution_time(start_state, "genetic")
+                animating = True
+            elif btn_and_or.is_clicked(event):
+                algo_selected = "and or"
+                solution_solved, time_solved = solution_time(start_state, "and_or")
+                animating = True
+            elif btn_part_belief.is_clicked(event):
+                algo_selected = "partial belief"
+                # Giả định 3 trạng thái bắt đầu và 2 goal
+                start_states = [
+                    [[1, 2, 3], [4, 5, 6], [7, 0, 8]],
+                    [[1, 2, 3], [4, 0, 6], [7, 5, 8]],
+                    [[1, 2, 3], [4, 5, 0], [7, 6, 8]],
+                ]
+                goal_states = [
+                    [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+                    # [[1, 2, 3], [4, 5, 6], [0, 7, 8]],
+                ]
+                from NguyenNgocThaiBao_23110180_tuan13_code_logic import search_with_partial_observation
+
+                steps, time_solved = search_with_partial_observation(start_states, goal_states)
+                partial_belief_interface(steps, goal_states, time_solved)
+            elif btn_belief.is_clicked(event):
+                algo_selected = "belief"
+                # Giả định 3 trạng thái bắt đầu và 2 goal
+                start_states = [
+                    [[1, 2, 3], [4, 5, 6], [7, 0, 8]],
+                    [[1, 2, 3], [4, 0, 6], [7, 5, 8]],
+                    [[1, 2, 3], [4, 5, 0], [7, 6, 8]],
+                ]
+                goal_states = [
+                    [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
+                    # [[1, 2, 3], [4, 5, 6], [0, 7, 8]],
+                ]
+                from NguyenNgocThaiBao_23110180_tuan13_code_logic import search_with_no_observation
+
+                steps, time_solved = search_with_no_observation(start_states, goal_states)
+                partial_belief_interface(steps, goal_states, time_solved)
+            elif btn_backtrack.is_clicked(event):
+                algo_selected = "backtracking"
+                solution_solved, time_solved = solution_time(start_state, "backtracking")
+                backtracking_interface(solution_solved, time_solved)
+            elif btn_backtrack_cons.is_clicked(event):
+                algo_selected = "backtracking contraints"
+                solution_solved, time_solved = solution_time(start_state, "backtracking_constraint_propagation")
+                backtracking_interface(solution_solved, time_solved)
+            elif btn_backtrack_heus.is_clicked(event):
+                algo_selected = "backtrack_heuristic"
+                solution_solved, time_solved = solution_time(start_state, "backtracking_lcv")
+                animating = True
             slider.handle_event(event)
         if animating:
             if solution_solved:
@@ -310,13 +563,22 @@ def main():
         btn_hill_simp.draw(screen)
         btn_hill_step.draw(screen)
         btn_hill_stocha.draw(screen)
+        btn_beam.draw(screen)
+        btn_sa.draw(screen)
+        btn_generic.draw(screen)
+        btn_and_or.draw(screen)
         btn_random.draw(screen)
+        btn_belief.draw(screen)
+        btn_part_belief.draw(screen)
+        btn_backtrack.draw(screen)
+        btn_backtrack_cons.draw(screen)
+        btn_backtrack_heus.draw(screen)
         slider.draw(screen)
         slider_text = font_small.render(f"Delay: {slider.value:.1f}s", True, BLACK)
-        screen.blit(slider_text, (320, PUZZLE_AREA_HEIGHT + 250))
+        screen.blit(slider_text, (320, PUZZLE_AREA_HEIGHT + 300))
         if algo_selected:
             algo_text = font_small.render(f"Algo: {algo_selected}", True, BLACK)
-            screen.blit(algo_text, (50, PUZZLE_AREA_HEIGHT))
+            screen.blit(algo_text, (50, PUZZLE_AREA_HEIGHT - 20))
         pygame.display.flip()
         clock.tick(60)
     pygame.quit()
