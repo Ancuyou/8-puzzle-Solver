@@ -23,6 +23,13 @@ Uninformed Search bao gồm các thuật toán như BFS, DFS, UCS, và IDDFS. D�
 | UCS            | ![UCS](assets/uniformed_search_3.gif)   |
 | IDDFS          | ![IDDFS](assets/uniformed_search_4.gif) |
 
+| Tên thuật toán | Hình ảnh                                |
+| -------------- | --------------------------------------- |
+| BFS            | ![BFS](assets/BFS.gif)                  |
+| DFS            | ![DFS](assets/uniformed_search_2.gif)   |
+| UCS            | ![UCS](assets/uniformed_search_3.gif)   |
+| IDDFS          | ![IDDFS](assets/uniformed_search_4.gif) |
+
 ### Hình ảnh Trực quan
 
 | ![BFS](assets/BFS.gif)                                       | ![Tìm kiếm Không Thông Tin 2](assets/uniformed_search_2.gif) |
