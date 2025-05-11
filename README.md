@@ -1,23 +1,21 @@
-# Trực Quan Hóa Các Thuật Toán Tìm Kiếm Trong AI
+# Áp dụng các thuật toán tìm kiếm và tối ưu để giải bài toán 8 puzzle 
 
-Dự án này thể hiện các thuật toán tìm kiếm được sử dụng trong Trí tuệ Nhân tạo, bao gồm Tìm kiếm Không Thông Tin, Tìm kiếm Có Thông Tin, Tìm kiếm Cục Bộ, Tìm kiếm Phức Tạp, Bài toán Hài Hòa Ràng Buộc (CSPs), và Học Tăng Cường. Mỗi phần bao gồm các hình ảnh trực quan (GIF) và biểu đồ hiệu suất để giúp hiểu rõ hành vi của các thuật toán.
+Dự án này thể hiện các thuật toán tìm kiếm được sử dụng trong Trí tuệ Nhân tạo, bao gồm Tìm kiếm không có thông tin (Uninformed Search), Tìm kiếm có thông tin (Informed Search), Tìm kiếm cục bộ (Local Search), Tìm kiếm trong môi trường phức tạp (Complex Environments), Tìm kiếm có ràng buộc (CSPs), và Học tăng cường (Reinforcement Learning - Đang trong quá trình hoàn thiện). Mỗi phần bao gồm các hình ảnh trực quan (GIF) và biểu đồ hiệu suất để giúp hiểu rõ hành vi của các thuật toán, trong điều kiện môi trường tĩnh và xác định của trò chơi 8 puzzle. 
 
 ## Cấu trúc Thư mục
 
 - `__pycache__`: Thư mục chứa các file bộ nhớ đệm của Python (tự động tạo).
 - `assets/`: Chứa các file GIF và biểu đồ để trực quan hóa.
 - `logic.py`: Chứa mã nguồn chính để triển khai các thuật toán tìm kiếm.
-- `visualization.py`: Xử lý việc trực quan hóa các thuật toán bằng GIF và biểu đồ.
-- `data.csv`: Dữ liệu đầu vào cho các thuật toán.
+- `visualization.py`: Xử lý giao diện. 
 - `results.csv`: Kết quả đầu ra từ việc chạy các thuật toán.
-- `tree_interface.py`: Giao diện cho các thuật toán tìm kiếm dựa trên cây.
 
-## Tìm kiếm Không Thông Tin
+## Tìm kiếm không có thông tin (Uninformed Search)
 
-Tìm kiếm Không Thông Tin bao gồm các thuật toán như BFS, DFS, UCS, và DLS. Dưới đây là các hình ảnh trực quan cho từng thuật toán, cùng với biểu đồ hiệu suất.
+Uninformed Search bao gồm các thuật toán như BFS, DFS, UCS, và IDDFS. Dưới đây là các hình ảnh trực quan cho từng thuật toán, cùng với biểu đồ hiệu suất.
 
 ### Hình ảnh Trực quan
-| ![Tìm kiếm Không Thông Tin 1](assets/uniformed_search_1.gif) | ![Tìm kiếm Không Thông Tin 2](assets/uniformed_search_2.gif) |
+| ![BFS](assets/BFS.gif) | ![Tìm kiếm Không Thông Tin 2](assets/uniformed_search_2.gif) |
 |-------------------------------------------------------------|-------------------------------------------------------------|
 | ![Tìm kiếm Không Thông Tin 3](assets/uniformed_search_3.gif) | ![Tìm kiếm Không Thông Tin 4](assets/uniformed_search_4.gif) |
 
