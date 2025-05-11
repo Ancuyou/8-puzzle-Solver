@@ -1,3 +1,4 @@
+import csv
 import math
 import random
 import time
@@ -67,7 +68,9 @@ def uhst(state):  # unhashable state
 def hill_simp(start_state):
     path = {hst(start_state): None}
     current = start_state
+    explored = 0
     while True:
+        explored += 1
         current_h = manhattan_distance(current)
         improved = False
         children = generate_children(current)
@@ -82,14 +85,16 @@ def hill_simp(start_state):
         if not improved:
             break
         if is_goal(current):
-            return re_path(path, current)
-    return None
+            return re_path(path, current), explored
+    return None, explored
 
 
 def hill_climbing_steepest(start_state):
     path = {hst(start_state): None}
     current = start_state
+    explorer = 0
     while True:
+        explorer += 1
         current_h = manhattan_distance(current)
         best_neighbor = None
         best_neighbor_h = current_h
@@ -102,16 +107,18 @@ def hill_climbing_steepest(start_state):
             path[hst(best_neighbor)] = current
             current = best_neighbor
             if is_goal(current):
-                return re_path(path, current)
+                return re_path(path, current), explorer
         else:
             break
-    return None
+    return None, explorer
 
 
 def hill_climbing_stochastic(start_state):
     path = {hst(start_state): None}
     current = start_state
+    explorer = 0
     while True:
+        explorer += 1
         current_h = manhattan_distance(current)
         improved_neighbors = []
         weights = []
@@ -125,10 +132,10 @@ def hill_climbing_stochastic(start_state):
             path[hst(chosen)] = current
             current = chosen
             if is_goal(current):
-                return re_path(path, current)
+                return re_path(path, current), explorer
         else:
             break
-    return None
+    return None, explorer
 
 
 # def simulated_annealing(start_state, initial_temp=10000, cooling_rate=0.995, min_temp=1, max_iterations=12000):
@@ -160,10 +167,12 @@ def simulated_annealing(start_state, initial_temp=20000, cooling_rate=0.98, min_
     path = {hst(current): None}
     temperature = initial_temp
     iteration = 0
+    explorer = 0
 
     while temperature > min_temp and iteration < max_iterations:
+        explorer += 1
         if is_goal(current):
-            return re_path(path, current)
+            return re_path(path, current), explorer
         neighbors = generate_children(current)
         if not neighbors:
             break
@@ -177,7 +186,7 @@ def simulated_annealing(start_state, initial_temp=20000, cooling_rate=0.98, min_
         temperature *= cooling_rate
         iteration += 1
 
-    return None
+    return None, explorer
 
 
 # def beam_search(start_state, k=2):
@@ -233,7 +242,9 @@ def beam_search(start_state, k=2):
     visited = set()  # To track states in the current beam to avoid duplicates within one iteration
     limit = 50
     count = 0
+    explored = 0
     while beam and limit > 0:
+        explored += 1
         limit -= 1
         count += 1
         new_beam = []
@@ -241,7 +252,7 @@ def beam_search(start_state, k=2):
         for _ in range(len(beam)):
             _, current, current_path = heappop(beam)
             if is_goal(current):
-                return current_path
+                return current_path, explored
             for child in generate_children(current):
                 child_hst = hst(child)
                 # Allow revisiting states, but avoid duplicates in the same iteration
@@ -253,7 +264,7 @@ def beam_search(start_state, k=2):
         print(f"Xét lần {count}: {[(h, s) for h, s, _ in beam]}")
         if not beam:
             break
-    return None
+    return None, explored
 
 
 def bfs(start_state):
@@ -261,17 +272,19 @@ def bfs(start_state):
     visited = set()
     visited.add(hst(start_state))
     path = {hst(start_state): None}
+    explored = 0
     while queue:
         current = queue.popleft()
+        explored += 1
         if is_goal(current):
-            return re_path(path, current)
+            return re_path(path, current), explored
         for child in generate_children(current):
             child_hst = hst(child)
             if child_hst not in visited:
                 visited.add(child_hst)
                 queue.append(child)
                 path[child_hst] = current
-    return None
+    return None, explored
 
 
 def ucs(start_state):
@@ -280,10 +293,12 @@ def ucs(start_state):
     visited = {}
     visited[hst(start_state)] = 0
     path = {hst(start_state): None}
+    explorer = 0
     while pq:
+        explorer += 1
         cost, current = heappop(pq)
         if is_goal(current):
-            return re_path(path, current)
+            return re_path(path, current), explorer
         for child in generate_children(current):
             child_hst = hst(child)
             new_cost = cost + 1
@@ -291,20 +306,21 @@ def ucs(start_state):
                 visited[child_hst] = new_cost
                 heappush(pq, (new_cost, child))
                 path[child_hst] = current
-    return None
+    return None, explorer
 
 
-def deepening(state, depth, visited, path):  # dept là độ sâu còn lại mà ta có thể xuống, xuống một bậc thì depth giảm một
+def deepening(state, depth, visited, path, explorer):
     if is_goal(state):
         return re_path(path, state)
     if depth == 0:
         return None
+    explorer[0] += 1  # Cập nhật explorer qua tham chiếu danh sách
     for child in generate_children(state):
         child_hst = hst(child)
         if child_hst not in visited:
             visited.add(child_hst)
             path[child_hst] = state
-            result = deepening(child, depth - 1, visited, path)
+            result = deepening(child, depth - 1, visited, path, explorer)
             if result:
                 return result
             path.pop(child_hst)
@@ -313,15 +329,16 @@ def deepening(state, depth, visited, path):  # dept là độ sâu còn lại m�
 
 def iddfs(start_state, max_depth=50):
     depth = 0
+    explorer = [0]  # Sử dụng danh sách để theo dõi explorer
     while depth <= max_depth:
         visited = set()
         visited.add(hst(start_state))
         path = {hst(start_state): None}
-        result = deepening(start_state, depth, visited, path)
+        result = deepening(start_state, depth, visited, path, explorer)
         if result:
-            return result
+            return result, explorer[0]  # Trả về giá trị explorer cuối cùng
         depth += 1
-    return None
+    return None, explorer[0]
 
 
 def dfs(start_state, max_depth=100):
@@ -329,10 +346,12 @@ def dfs(start_state, max_depth=100):
     visited = set()
     visited.add(hst(start_state))
     path = {hst(start_state): None}
+    explorer = 0
     while stack:
         current, depth = stack.pop()
+        explorer += 1
         if is_goal(current):
-            return re_path(path, current)
+            return re_path(path, current), explorer
         if depth < max_depth:
             for child in generate_children(current):
                 child_hst = hst(child)
@@ -340,7 +359,7 @@ def dfs(start_state, max_depth=100):
                     visited.add(child_hst)
                     stack.append((child, depth + 1))
                     path[child_hst] = current
-    return None
+    return None, explorer
 
 
 def gbfs(start_state):
@@ -349,17 +368,19 @@ def gbfs(start_state):
     visited = set()
     visited.add(hst(start_state))
     path = {hst(start_state): None}
+    explorer = 0
     while pq:
         _, current = heappop(pq)
+        explorer += 1
         if is_goal(current):
-            return re_path(path, current)
+            return re_path(path, current), explorer
         for child in generate_children(current):
             child_hst = hst(child)
             if child_hst not in visited:
                 visited.add(child_hst)
                 heappush(pq, (manhattan_distance(child), child))
                 path[child_hst] = current
-    return None
+    return None, explorer
 
 
 def A_star(start_state):
@@ -368,21 +389,24 @@ def A_star(start_state):
     visited = set()
     visited.add(hst(start_state))
     path = {hst(start_state): None}
+    explorer = 0
     while pq:
         _, current = heappop(pq)
+        explorer += 1
         if is_goal(current):
-            return re_path(path, current)
+            return re_path(path, current), explorer
         for child in generate_children(current):
             child_hst = hst(child)
             if child_hst not in visited:
                 visited.add(child_hst)
                 heappush(pq, (manhattan_distance(child) + 1, child))
                 path[child_hst] = current
-    return None
+    return None, explorer
 
 
-def ida_search(path, g, threshold):
+def ida_search(path, g, threshold, explorer):
     current = path[-1]
+    explorer[0] += 1
     f = g + manhattan_distance(current)
     if f > threshold:
         return f
@@ -393,7 +417,7 @@ def ida_search(path, g, threshold):
         if any(hst(child) == hst(p) for p in path):
             continue
         path.append(child)
-        temp = ida_search(path, g + 1, threshold)
+        temp = ida_search(path, g + 1, threshold, explorer)
         if isinstance(temp, list):
             return temp
         if temp < minimum:
@@ -405,18 +429,20 @@ def ida_search(path, g, threshold):
 def ida_star(start_state):
     threshold = manhattan_distance(start_state)
     path = [start_state]
+    explorer = [0]
     while True:
-        temp = ida_search(path, 0, threshold)
+        temp = ida_search(path, 0, threshold, explorer)
         if isinstance(temp, list):
-            return temp
+            return temp, explorer[0]
         if temp == float("inf"):
-            return None
+            return None, explorer[0]
         threshold = temp
 
 
 def genetic(start_state, population_size=100, generations=10000, mutation_rate=0.1, max_steps=50):
     # Định nghĩa các hướng di chuyển
     moves = ["U", "D", "L", "R"]
+    explorer = [0]
 
     def create_individual():
         # Tạo chuỗi ngẫu nhiên các nước đi
@@ -427,6 +453,7 @@ def genetic(start_state, population_size=100, generations=10000, mutation_rate=0
         current = state
         path = [current]
         for move in move_sequence:
+            explorer[0] += 1
             children = generate_children(current)
             for child in children:
                 if get_move(current, child) == move:
@@ -464,6 +491,7 @@ def genetic(start_state, population_size=100, generations=10000, mutation_rate=0
         # Tính fitness dựa trên đường đi
         path = apply_moves(start_state, individual)
         last_state = path[-1]
+        explorer[0] += 1
         if is_goal(last_state):
             return -len(path)  # Ưu tiên đường đi ngắn
         return manhattan_distance(last_state) + misplaced_tiles(last_state)
@@ -490,7 +518,7 @@ def genetic(start_state, population_size=100, generations=10000, mutation_rate=0
         for individual in population:
             path = apply_moves(start_state, individual)
             if is_goal(path[-1]):
-                return path  # Trả về đường đi nếu tìm thấy
+                return path, explorer[0]  # Trả về đường đi nếu tìm thấy
         # Chọn một nửa tốt nhất
         next_generation = population[: population_size // 2]
         # Tạo cá thể mới
@@ -500,20 +528,22 @@ def genetic(start_state, population_size=100, generations=10000, mutation_rate=0
             child = mutate(child)
             next_generation.append(child)
         population = next_generation
-    return None  # Không tìm thấy đường đi
+    return None, explorer[0]  # Không tìm thấy đường đi
 
 
 def and_or_search(start_state):
     path = {hst(start_state): None}
+    explorer = 0
     if is_goal(start_state):
-        return re_path(path, start_state)
+        return re_path(path, start_state), explorer
     or_nodes = deque([start_state])
     visited = set()
     visited.add(hst(start_state))
     while or_nodes:
         current = or_nodes.popleft()
+        explorer += 1
         if is_goal(current):
-            return re_path(path, current)
+            return re_path(path, current), explorer
         children = generate_children(current)
         if not children:
             continue
@@ -524,8 +554,8 @@ def and_or_search(start_state):
                 path[child_hst] = current
                 or_nodes.append(child)
                 if is_goal(child):
-                    return re_path(path, child)
-    return None
+                    return re_path(path, child), explorer
+    return None, explorer
 
 
 def state_to_tuple(state):
@@ -551,12 +581,14 @@ def possible_moves(state):
 def search_with_no_observation(start_states, goal_states, max_steps=50):
     goal_set = {state_to_tuple(g) for g in goal_states}
     frontiers = [set(state_to_tuple(s) for s in start_states)]
-    t0 = time.time()
+    t0 = time.perf_counter()
+    explorer = 0
 
     for _ in range(max_steps):
         curr = frontiers[-1]
         nxt = set()
         for s_tup in curr:
+            explorer += 1
             for m in possible_moves(tuple_to_state(s_tup)):
                 nxt.add(state_to_tuple(m))
         frontiers.append(nxt)
@@ -565,23 +597,28 @@ def search_with_no_observation(start_states, goal_states, max_steps=50):
             break
         if not nxt:
             break
-
-    elapsed = time.time() - t0
-    # convert back to list-of-list for interface
     steps = [[tuple_to_state(s) for s in f] for f in frontiers]
-    return steps, elapsed
+    elapsed_ms = (time.perf_counter() - t0) * 1000
+    solved_flag = 1 if steps else 0
+    # Mở file ở chế độ append và ghi dòng mới
+    with open("results.csv", "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Search_with_no_observation", f"{elapsed_ms:.3f}", len(steps) if steps else 0, explorer, solved_flag])
+    return steps, elapsed_ms
 
 
 # Search with Partial Observation: filter each frontier by observation at (0,0)==1, stop when ANY frontier contains goal
 def search_with_partial_observation(start_states, goal_states, max_steps=50):
     goal_set = {state_to_tuple(g) for g in goal_states}
     frontiers = [set(state_to_tuple(s) for s in start_states)]
-    t0 = time.time()
+    t0 = time.perf_counter()
+    explorer = 0
 
     for _ in range(max_steps):
         curr = frontiers[-1]
         nxt = set()
         for s_tup in curr:
+            explorer += 1
             for m in possible_moves(tuple_to_state(s_tup)):
                 tup = state_to_tuple(m)
                 # partial observation: only keep if top-left cell == 1
@@ -594,85 +631,14 @@ def search_with_partial_observation(start_states, goal_states, max_steps=50):
         if not nxt:
             break
 
-    elapsed = time.time() - t0
     steps = [[tuple_to_state(s) for s in f] for f in frontiers]
-    return steps, elapsed
-
-
-# def generate_belief_states(start_state, num_states=3):
-#     belief_states = [start_state]
-#     while len(belief_states) < num_states:
-#         random_child = random.choice(generate_children(start_state))
-#         if hst(random_child) not in map(hst, belief_states):
-#             belief_states.append(random_child)
-#     return belief_states
-
-
-# def search_with_partial_observation(belief_states, goal_states, max_steps=50):
-#     def possible_moves(state):
-#         moves = []
-#         x, y = [(ix, iy) for ix, row in enumerate(state) for iy, i in enumerate(row) if i == 0][0]
-#         dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-#         for dx, dy in dirs:
-#             nx, ny = x + dx, y + dy
-#             if 0 <= nx < 3 and 0 <= ny < 3:
-#                 new_state = [row[:] for row in state]
-#                 new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
-#                 moves.append(new_state)
-#         return moves
-
-#     steps = [deepcopy(belief_states)]
-#     t0 = time.time()
-#     for step in range(max_steps):
-#         next_belief = []
-#         for state in steps[-1]:
-#             next_belief.extend(possible_moves(state))
-#         next_belief_unique = []
-#         for s in next_belief:
-#             if not any(s == b for b in next_belief_unique):
-#                 next_belief_unique.append(s)
-#         steps.append(next_belief_unique)
-#         for s in next_belief_unique:
-#             if any(s == g for g in goal_states):
-#                 return steps, time.time() - t0
-#         if not next_belief_unique:
-#             break
-#     return steps, time.time() - t0
-
-
-# def search_with_no_observation(belief_states, goal_states, max_steps=20):
-#     def possible_moves(state):
-#         moves = []
-#         x, y = [(ix, iy) for ix, row in enumerate(state) for iy, i in enumerate(row) if i == 0][0]
-#         dirs = [(-1, 0), (1, 0), (0, -1), (0, 1)]
-#         for dx, dy in dirs:
-#             nx, ny = x + dx, y + dy
-#             if 0 <= nx < 3 and 0 <= ny < 3:
-#                 new_state = [row[:] for row in state]
-#                 new_state[x][y], new_state[nx][ny] = new_state[nx][ny], new_state[x][y]
-#                 moves.append(new_state)
-#         return moves
-
-#     def state_to_tuple(state):
-#         return tuple(tuple(row) for row in state)
-
-#     steps = [deepcopy(belief_states)]
-#     t0 = time.time()
-#     for step in range(max_steps):
-#         next_belief = []
-#         seen = set()
-#         for state in steps[-1]:
-#             for s in possible_moves(state):
-#                 t = state_to_tuple(s)
-#                 if t not in seen:
-#                     seen.add(t)
-#                     next_belief.append(s)
-#         steps.append(next_belief)
-#         if next_belief and all(any(s == g for g in goal_states) for s in next_belief):
-#             return steps, time.time() - t0
-#         if not next_belief:
-#             break
-#     return steps, time.time() - t0
+    elapsed_ms = (time.perf_counter() - t0) * 1000
+    solved_flag = 1 if steps else 0
+    # Mở file ở chế độ append và ghi dòng mới
+    with open("results.csv", "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow(["Search_with_partial_observation", f"{elapsed_ms:.3f}", len(steps) if steps else 0, explorer, solved_flag])
+    return steps, elapsed_ms
 
 
 csp_cons = {"variables": [(i, j) for i in range(3) for j in range(3)], "domains": {(i, j): list(range(0, 9)) for i in range(3) for j in range(3)}, "constraints": lambda var1, val1, var2, val2: val1 != val2}  # Tọa độ (hàng, cột) cho bảng 3x3  # Giá trị từ 1 đến 8 cho mỗi ô  # Không có số nào lặp lại
@@ -700,10 +666,12 @@ def compare_state(assignment, start_state):
 
 
 def backtracking(csp):
-    return backtrack({}, csp)
+    explorer = [0]
+    result = backtrack({}, csp, explorer)
+    return result, explorer[0]
 
 
-def backtrack(assignment, csp):
+def backtrack(assignment, csp, explorer):
     if len(assignment) == len(csp["variables"]):
         if compare_state(assignment, GOAL_STATE):
             return assignment
@@ -715,9 +683,10 @@ def backtrack(assignment, csp):
     values = csp["domains"][var]
     random.shuffle(values)  # Shuffle the values to introduce randomness
     for value in values:
+        explorer[0] += 1
         if csp["constraints"] is None or is_consistent(assignment, var, value, csp):
             assignment[var] = value
-            result = backtrack(assignment, csp)
+            result = backtrack(assignment, csp, explorer)
             if result:
                 return result
             del assignment[var]
@@ -745,26 +714,6 @@ def make_neighbors():
 
 
 csp_cons["neighbors"] = make_neighbors()
-
-
-# def select_unassigned_variable_mrv(assignment, csp):
-#     """
-#     Chọn ô chưa gán có số giá trị khả dụng thỏa điều kiện nhất quán (nếu có ràng buộc)
-#     nhỏ nhất, tức là ô đó có "Minimum Remaining Values".
-#     """
-#     unassigned_vars = [var for var in csp["variables"] if var not in assignment]
-#     min_var = None
-#     min_remaining = float("inf")
-#     for var in unassigned_vars:
-#         count = 0
-#         for value in csp["domains"][var]:
-#             # Nếu không có ràng buộc, hoặc giá trị này thỏa mãn khi gán vào biến
-#             if csp["constraints"] is None or is_consistent(assignment, var, value, csp):
-#                 count += 1
-#         if count < min_remaining:
-#             min_remaining = count
-#             min_var = var
-#     return min_var
 
 
 def select_unassigned_variable_mrv(assignment, csp):
@@ -831,137 +780,173 @@ def order_values_lcv(var, assignment, csp):
     return [val for imp, val in impacts]
 
 
-def backtracking_mrv_lcv(assignment, csp):
+def backtracking_mrv_lcv_wrapper(csp):
+    explorer = [0]
+    result = backtracking_mrv_lcv({}, csp, explorer)
+    return result, explorer[0]
+
+
+def backtracking_mrv_lcv(assignment, csp, explorer):
     if len(assignment) == len(csp["variables"]):
+        explorer[0] += 1
         return assignment if compare_state(assignment, GOAL_STATE) else None
 
-    # 1) Chọn biến theo MRV
     var = select_unassigned_variable_mrv(assignment, csp)
 
-    # 2) Lấy giá trị đã order qua LCV
     for value in order_values_lcv(var, assignment, csp):
+        explorer[0] += 1
         if is_consistent(assignment, var, value, csp):
             assignment[var] = value
-            result = backtracking_mrv_lcv(assignment, csp)
+            result = backtracking_mrv_lcv(assignment, csp, explorer)
             if result:
                 return result
             del assignment[var]
+
     return None
 
-    # def select_unassigned_variable_lcv(assignment, csp):
-    #     """
-    #     Chọn ô chưa gán sao cho việc gán giá trị vào ô này gây ảnh hưởng nhỏ nhất
-    #     (loại bỏ ít giá trị khỏi miền của các ô lân cận nhất).
-    #     """
-    #     unassigned_vars = [v for v in csp["variables"] if v not in assignment]
-    #     best_var = None
-    #     best_impact = float("inf")
 
-    #     for var in unassigned_vars:
-    #         # Tính mức độ tác động lớn nhất của việc gán bất kỳ giá trị nào cho var
-    #         max_neighbor_prune = 0
-    #         for value in csp["domains"][var]:
-    #             if not is_consistent(assignment, var, value, csp):
-    #                 continue
-    #             prune_count = 0
-    #             # Duyệt qua các biến lân cận để đếm số giá trị miền bị loại bỏ
-    #             for neighbor in csp.get("neighbors", {}).get(var, []):
-    #                 if neighbor in assignment:
-    #                     continue
-    #                 for v2 in csp["domains"][neighbor]:
-    #                     # Nếu không thỏa ràng buộc nhị phân giữa (var=value) và (neighbor=v2)
-    #                     if not satisfies_constraint(var, value, neighbor, v2, csp):
-    #                         prune_count += 1
-    #             max_neighbor_prune = max(max_neighbor_prune, prune_count)
+# def backtracking_mrv_lcv(assignment, csp):
+#     explorer = 0
+#     if len(assignment) == len(csp["variables"]):
+#         explorer += 1
+#         return assignment, explorer if compare_state(assignment, GOAL_STATE) else None
 
-    #         # Chọn biến có mức độ tác động (prune) nhỏ nhất
-    #         if max_neighbor_prune < best_impact:
-    #             best_impact = max_neighbor_prune
-    #             best_var = var
+#     # 1) Chọn biến theo MRV
+#     var = select_unassigned_variable_mrv(assignment, csp)
 
-    #     return best_var
+#     # 2) Lấy giá trị đã order qua LCV
+#     for value in order_values_lcv(var, assignment, csp):
+#         if is_consistent(assignment, var, value, csp):
+#             assignment[var] = value
+#             result = backtracking_mrv_lcv(assignment, csp)
+#             if result:
+#                 return result
+#             del assignment[var]
+#     explorer += 1
+#     return None, explorer
 
-    # def backtracking_lcv(assignment, csp):
-    #     # Nếu tất cả các biến đã được gán, kiểm tra kết quả
-    #     if len(assignment) == len(csp["variables"]):
-    #         if compare_state(assignment, GOAL_STATE):  # Bạn có thể thay GOAL_STATE bằng start_state nếu cần
-    #             return assignment
-    #         else:
-    #             return None
+# def select_unassigned_variable_lcv(assignment, csp):
+#     """
+#     Chọn ô chưa gán sao cho việc gán giá trị vào ô này gây ảnh hưởng nhỏ nhất
+#     (loại bỏ ít giá trị khỏi miền của các ô lân cận nhất).
+#     """
+#     unassigned_vars = [v for v in csp["variables"] if v not in assignment]
+#     best_var = None
+#     best_impact = float("inf")
 
-    #     # Chọn biến chưa gán theo MRV (có ít khả năng lựa chọn nhất)
-    #     var = select_unassigned_variable_lcv(assignment, csp)
-    #     # Lấy dãy các giá trị từ domain của biến và trộn ngẫu nhiên để tăng tính ngẫu nhiên
-    #     values = csp["domains"][var][:]
-    #     random.shuffle(values)
+#     for var in unassigned_vars:
+#         # Tính mức độ tác động lớn nhất của việc gán bất kỳ giá trị nào cho var
+#         max_neighbor_prune = 0
+#         for value in csp["domains"][var]:
+#             if not is_consistent(assignment, var, value, csp):
+#                 continue
+#             prune_count = 0
+#             # Duyệt qua các biến lân cận để đếm số giá trị miền bị loại bỏ
+#             for neighbor in csp.get("neighbors", {}).get(var, []):
+#                 if neighbor in assignment:
+#                     continue
+#                 for v2 in csp["domains"][neighbor]:
+#                     # Nếu không thỏa ràng buộc nhị phân giữa (var=value) và (neighbor=v2)
+#                     if not satisfies_constraint(var, value, neighbor, v2, csp):
+#                         prune_count += 1
+#             max_neighbor_prune = max(max_neighbor_prune, prune_count)
 
-    # for value in values:
-    #     if csp["constraints"] is None or is_consistent(assignment, var, value, csp):
-    #         assignment[var] = value
-    #         result = backtracking_lcv(assignment, csp)
-    #         if result is not None:
-    #             return result
-    #         del assignment[var]
-    # return None
+#         # Chọn biến có mức độ tác động (prune) nhỏ nhất
+#         if max_neighbor_prune < best_impact:
+#             best_impact = max_neighbor_prune
+#             best_var = var
+
+#     return best_var
+
+# def backtracking_lcv(assignment, csp):
+#     # Nếu tất cả các biến đã được gán, kiểm tra kết quả
+#     if len(assignment) == len(csp["variables"]):
+#         if compare_state(assignment, GOAL_STATE):  # Bạn có thể thay GOAL_STATE bằng start_state nếu cần
+#             return assignment
+#         else:
+#             return None
+
+#     # Chọn biến chưa gán theo MRV (có ít khả năng lựa chọn nhất)
+#     var = select_unassigned_variable_lcv(assignment, csp)
+#     # Lấy dãy các giá trị từ domain của biến và trộn ngẫu nhiên để tăng tính ngẫu nhiên
+#     values = csp["domains"][var][:]
+#     random.shuffle(values)
+
+# for value in values:
+#     if csp["constraints"] is None or is_consistent(assignment, var, value, csp):
+#         assignment[var] = value
+#         result = backtracking_lcv(assignment, csp)
+#         if result is not None:
+#             return result
+#         del assignment[var]
+# return None
 
 
 def solution_time(start_state, algo_type, stop_event=None):
     start_time = time.time()
     end_time = 0
     solution = None
+    t0 = time.perf_counter()
     if algo_type == "dfs":
-        solution = dfs(start_state)
+        solution, explorer = dfs(start_state)
         end_time = time.time()
     elif algo_type == "bfs":
-        solution = bfs(start_state)
+        solution, explorer = bfs(start_state)
         end_time = time.time()
     elif algo_type == "ucs":
-        solution = ucs(start_state)
+        solution, explorer = ucs(start_state)
         end_time = time.time()
     elif algo_type == "iddfs":
-        solution = iddfs(start_state)
+        solution, explorer = iddfs(start_state)
         end_time = time.time()
     elif algo_type == "gbfs":
-        solution = gbfs(start_state)
+        solution, explorer = gbfs(start_state)
         end_time = time.time()
     elif algo_type == "A_star":
-        solution = A_star(start_state)
+        solution, explorer = A_star(start_state)
         end_time = time.time()
     elif algo_type == "ida_star":
-        solution = ida_star(start_state)
+        solution, explorer = ida_star(start_state)
         end_time = time.time()
     elif algo_type == "hill_simp":
-        solution = hill_simp(start_state)
+        solution, explorer = hill_simp(start_state)
         end_time = time.time()
     elif algo_type == "hill_steepest":
-        solution = hill_climbing_steepest(start_state)
+        solution, explorer = hill_climbing_steepest(start_state)
         end_time = time.time()
     elif algo_type == "hill_stochastic":
-        solution = hill_climbing_stochastic(start_state)
+        solution, explorer = hill_climbing_stochastic(start_state)
         end_time = time.time()
     elif algo_type == "beam":
-        solution = beam_search(start_state)
+        solution, explorer = beam_search(start_state)
         end_time = time.time()
     elif algo_type == "simulated_annealing":
-        solution = simulated_annealing(start_state)
+        solution, explorer = simulated_annealing(start_state)
         end_time = time.time()
     elif algo_type == "genetic":
-        solution = genetic(start_state)
+        solution, explorer = genetic(start_state)
         end_time = time.time()
     elif algo_type == "and_or":
-        solution = and_or_search(start_state)
+        solution, explorer = and_or_search(start_state)
         end_time = time.time()
     elif algo_type == "backtracking":
-        solution = backtracking(csp_simple)
+        solution, explorer = backtracking(csp_simple)
         end_time = time.time()
     elif algo_type == "backtracking_constraint_propagation":
-        solution = backtracking(csp_cons)
+        solution, explorer = backtracking(csp_cons)
         end_time = time.time()
     elif algo_type == "backtracking_lcv":
-        solution = backtracking_mrv_lcv({}, csp_cons)
+        solution, explorer = backtracking_mrv_lcv_wrapper(csp_cons)
         end_time = time.time()
-    execution_time = end_time - start_time
-    return solution, execution_time
+
+    elapsed_ms = (time.perf_counter() - t0) * 1000
+    solved_flag = 1 if solution else 0
+    # Mở file ở chế độ append và ghi dòng mới
+    with open("results.csv", "a", newline="") as f:
+        writer = csv.writer(f)
+        writer.writerow([algo_type, f"{elapsed_ms:.3f}", len(solution) if solution else 0, explorer, solved_flag])
+    # execution_time = end_time - start_time
+    return solution, elapsed_ms
 
 
 def re_path(path, state):
