@@ -10,3 +10,4 @@ List of algorithms:
 7. HillClimbing (Simple)
 8. HillClimbing (Steepest)
 9. HillClimbing (Stochastic)
+![DBFS](assets/BFS.gif) 
