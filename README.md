@@ -16,64 +16,58 @@ Uninformed Search bao gồm các thuật toán như BFS, DFS, UCS, và IDDFS. D�
 
 ### Hình ảnh Trực quan
 
-| Tên thuật toán | Hình ảnh                                |
-| -------------- | --------------------------------------- |
-| BFS            | ![BFS](assets/BFS_2.gif)                |
-| DFS            | ![DFS](assets/uniformed_search_2.gif)   |
-| UCS            | ![UCS](assets/uniformed_search_3.gif)   |
-| IDDFS          | ![IDDFS](assets/uniformed_search_4.gif) |
-
-| Tên thuật toán | Hình ảnh                                |
-| -------------- | --------------------------------------- |
-| BFS            | ![BFS](assets/BFS.gif)                  |
-| DFS            | ![DFS](assets/uniformed_search_2.gif)   |
-| UCS            | ![UCS](assets/uniformed_search_3.gif)   |
-| IDDFS          | ![IDDFS](assets/uniformed_search_4.gif) |
-
-### Hình ảnh Trực quan
-
-| ![BFS](assets/BFS.gif)                                       | ![Tìm kiếm Không Thông Tin 2](assets/uniformed_search_2.gif) |
-| ------------------------------------------------------------ | ------------------------------------------------------------ |
-| ![Tìm kiếm Không Thông Tin 3](assets/uniformed_search_3.gif) | ![Tìm kiếm Không Thông Tin 4](assets/uniformed_search_4.gif) |
+| Tên thuật toán | Hình ảnh                   |
+| -------------- | -------------------------- |
+| BFS            | ![BFS](assets/BFS_2.gif)   |
+| DFS            | ![DFS](assets/DFS.gif)     |
+| UCS            | ![UCS](assets/UCS.gif)     |
+| IDDFS          | ![IDDFS](assets/IDDFS.gif) |
 
 ### Biểu đồ Hiệu suất
 
-![Biểu đồ Tìm kiếm Không Thông Tin](assets/uniformed_search_chart.png)
+![Biểu đồ Tìm kiếm Không Thông Tin](assets/uninformed.png)
 
 ### Phân tích
 
 [Thêm phần phân tích của bạn về Tìm kiếm Không Thông Tin tại đây.]
 
-## Tìm kiếm Có Thông Tin
+## Tìm kiếm Có Thông Tin (Informed Search)
 
 Tìm kiếm Có Thông Tin bao gồm các thuật toán như A\*, Tìm kiếm Tốt Nhất Trước Hết theo Heuristic, và một phương pháp dựa trên heuristic khác. Dưới đây là các hình ảnh trực quan và biểu đồ hiệu suất.
 
 ### Hình ảnh Trực quan
 
-| ![Tìm kiếm Có Thông Tin 1](assets/informed_search_1.gif) | ![Tìm kiếm Có Thông Tin 2](assets/informed_search_2.gif) | ![Tìm kiếm Có Thông Tin 3](assets/informed_search_3.gif) |
-| -------------------------------------------------------- | -------------------------------------------------------- | -------------------------------------------------------- |
+| Tên thuật toán | Hình ảnh                |
+| -------------- | ----------------------- |
+| A\*            | ![A*](assets/A.gif)     |
+| IDA\*          | ![IDA*](assets/IDA.gif) |
+| GBFS           | ![GBFS](assets/GB.gif)  |
 
 ### Biểu đồ Hiệu suất
 
-![Biểu đồ Tìm kiếm Có Thông Tin](assets/informed_search_chart.png)
+![Biểu đồ Tìm kiếm Có Thông Tin](assets/informed.png)
 
 ### Phân tích
 
 [Thêm phần phân tích của bạn về Tìm kiếm Có Thông Tin tại đây.]
 
-## Tìm kiếm Cục Bộ
+## Tìm kiếm Cục Bộ (Local Search)
 
 Tìm kiếm Cục Bộ bao gồm các thuật toán như Leo Đồi (Hill Climbing), Ủ Nhiệt Mô Phỏng (Simulated Annealing), Thuật toán Di truyền (Genetic Algorithms), và các thuật toán khác. Dưới đây là các hình ảnh trực quan và biểu đồ hiệu suất.
 
 ### Hình ảnh Trực quan
 
-| ![Tìm kiếm Cục Bộ 1](assets/local_search_1.gif) | ![Tìm kiếm Cục Bộ 2](assets/local_search_2.gif) | ![Tìm kiếm Cục Bộ 3](assets/local_search_3.gif) |
-| ----------------------------------------------- | ----------------------------------------------- | ----------------------------------------------- |
-| ![Tìm kiếm Cục Bộ 4](assets/local_search_4.gif) | ![Tìm kiếm Cục Bộ 5](assets/local_search_5.gif) | ![Tìm kiếm Cục Bộ 6](assets/local_search_6.gif) |
+| Tên thuật toán          | Hình ảnh                      |
+| ----------------------- | ----------------------------- |
+| HillClimbing(Simple)    | ![BFS](assets/hill_simp.gif)  |
+| HillClimbing(Steepest)  | ![DFS](assets/Hill_steep.gif) |
+| HillClimbing(Stochatic) | ![UCS](assets/hill_stor.gif)  |
+| Simulated Annealing     | ![IDDFS](assets/SA.gif)       |
+| Genetic Algorithm       | ![IDDFS](assets/Genertic.gif) |
 
 ### Biểu đồ Hiệu suất
 
-![Biểu đồ Tìm kiếm Cục Bộ](assets/local_search_chart.png)
+![Biểu đồ Tìm kiếm Cục Bộ](assets/local.png)
 
 ### Phân tích
 
@@ -85,12 +79,15 @@ Tìm kiếm Phức Tạp bao gồm ba thuật toán nâng cao cùng với các h
 
 ### Hình ảnh Trực quan
 
-| ![Tìm kiếm Phức Tạp 1](assets/complex_search_1.gif) | ![Tìm kiếm Phức Tạp 2](assets/complex_search_2.gif) | ![Tìm kiếm Phức Tạp 3](assets/complex_search_3.gif) |
-| --------------------------------------------------- | --------------------------------------------------- | --------------------------------------------------- |
+| Tên thuật toán          | Hình ảnh                       |
+| ----------------------- | ------------------------------ |
+| Search with no obs      | ![A*](assets/belief.gif)       |
+| Search with partial obs | ![IDA*](assets/partbelief.gif) |
+| And or search           | ![GBFS](assets/AndOr.gif)      |
 
 ### Biểu đồ Hiệu suất
 
-![Biểu đồ Tìm kiếm Phức Tạp](assets/complex_search_chart.png)
+![Biểu đồ Tìm kiếm Phức Tạp](assets/complex.png)
 
 ### Phân tích
 
@@ -102,12 +99,15 @@ CSPs bao gồm các thuật toán như Quay lui (Backtracking), Kiểm tra Tính
 
 ### Hình ảnh Trực quan
 
-| ![CSP 1](assets/csp_1.gif) | ![CSP 2](assets/csp_2.gif) | ![CSP 3](assets/csp_3.gif) |
-| -------------------------- | -------------------------- | -------------------------- |
+| Tên thuật toán             | Hình ảnh                              |
+| -------------------------- | ------------------------------------- |
+| Backtracking (simple)      | ![Backtrack(Simple)](assets/back.gif) |
+| Backtracking (constraints) | ![IDA*](assets/back_cons.gif)         |
+| Backtracking (LCV)         | ![GBFS](assets/back_heus.gif)         |
 
 ### Biểu đồ Hiệu suất
 
-![Biểu đồ CSP](assets/csp_chart.png)
+![Biểu đồ CSP](assets/CSPs.png)
 
 ### Phân tích
 
@@ -140,8 +140,8 @@ Phần này hiện đang trong quá trình phát triển.
 
 1. Tải mã nguồn về máy:
    ```bash
-   git clone https://github.com/ten-nguoi-dung/ten-kho-luu.git
-   cd ten-kho-luu
+   git clone https://github.com/Ancuyou/8-puzzle-Solver.git
+   cd 8-puzzle-Solver
    ```
 2. Tạo môi trường ảo (khuyến khích nhưng không bắt buộc):
    ```bash
@@ -179,4 +179,4 @@ Chúng tôi hoan nghênh mọi đóng góp! Vui lòng làm theo các bước sau
 
 ## Liên hệ
 
-Nếu có câu hỏi hoặc phản hồi, vui lòng liên hệ qua [email-cua-ban@example.com](mailto:email-cua-ban@example.com) hoặc mở một issue trên GitHub.
+Nếu có câu hỏi hoặc phản hồi, vui lòng liên hệ qua [nguyenngocthaibaodetox@gmail.com](mailto:nguyenngocthaibaodetox@gmail.com) hoặc mở một issue trên GitHub.
