@@ -8,6 +8,7 @@ import pandas as pd
 import pygame
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
+import qlearning
 from logic import solution_time
 
 WINDOW_WIDTH = 640
@@ -162,7 +163,7 @@ def animate_solution(solution, slider, time_solved):
             draw_puzzle(screen, solution[i], offset=RIGHT_PUZZLE_OFFSET)
         else:
             draw_puzzle(screen, solution[-1], offset=RIGHT_PUZZLE_OFFSET)
-        info_text = f"Steps: {i}  Time: {time_solved:.1f}s"
+        info_text = f"Steps: {i}  Time: {time_solved:.3f}ms"
         info_surface = font_small.render(info_text, True, BLACK)
         screen.blit(info_surface, (10, PUZZLE_HEIGHT + 70))
         btn_menu.draw(screen)
@@ -742,7 +743,7 @@ def main():
     btn_belief = Button((350, PUZZLE_AREA_HEIGHT + 250, 100, 40), "Belief")
     btn_ql = Button((500, PUZZLE_AREA_HEIGHT + 250, 100, 40), "QLearning")
     btn_random = Button((277, PUZZLE_AREA_HEIGHT, 100, 40), "Random")
-    btn_analysis = Button((400, PUZZLE_AREA_HEIGHT + 300, 100, 40), "Analysis")
+    btn_analysis = Button((500, PUZZLE_AREA_HEIGHT + 300, 100, 40), "Analysis")
     slider = Slider((50, PUZZLE_AREA_HEIGHT + 300, 250, 20), 0.01, 2.0, 1.0)
     btn_back = Button((WINDOW_WIDTH - 120, PUZZLE_AREA_HEIGHT + 300, 100, 40), "Back")
     running = True
@@ -869,6 +870,10 @@ def main():
                 thread_manager.cancel_all()
                 is_processing = False
                 algo_selected = None
+            elif btn_ql.is_clicked(event):
+                algo_selected = "Q-learning"
+                solution_solved, time_solved = qlearning.q_learning(start_state)
+                animating = True
             elif btn_analysis.is_clicked(event):
                 show_analysis_screen(screen, clock, WINDOW_WIDTH, WINDOW_HEIGHT)
             slider.handle_event(event)
