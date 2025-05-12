@@ -198,6 +198,7 @@ Học Tăng Cường (Reinforcement Learning - RL) áp dụng agent học qua th
 ### Phân tích
 
 RL huấn luyện agent qua phần thưởng, phù hợp với bài toán động hơn 8 puzzle tĩnh, cập nhật Q theo công thức:
+
 ![CT](assets/ct.png)
 
 - `Q-Learning`: Học bảng Q qua thử nghiệm, hiệu quả với không gian nhỏ. Với 8 puzzle, tốc độ học chậm do không gian trạng thái lớn (181,440 trạng thái khả thi), cần nhiều lần lặp. Không đảm bảo tối ưu như A\*, nhưng linh hoạt với môi trường thay đổi. Biểu đồ ở trên nêu lên so sánh trực quan về Q-learning-first với 2000 episode ban đầu và Q-learning nâng cao hơn với việc tăng số episode lên 50000, tăng epsilon cho khả năng khám phá ban đầu tốt hơn,... và đã mang lại hiệu suất tốt hơn hẳn. Tuy nhiên vẫn có thể cải thiện thêm.
