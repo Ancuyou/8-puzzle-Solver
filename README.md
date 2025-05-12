@@ -1,6 +1,6 @@
 # Áp dụng các thuật toán tìm kiếm và tối ưu để giải bài toán 8 puzzle
 
-Dự án này thể hiện các thuật toán tìm kiếm được sử dụng trong Trí tuệ Nhân tạo, bao gồm Tìm kiếm không có thông tin (Uninformed Search), Tìm kiếm có thông tin (Informed Search), Tìm kiếm cục bộ (Local Search), Tìm kiếm trong môi trường phức tạp (Complex Environments), Tìm kiếm có ràng buộc (CSPs), và Học tăng cường (Reinforcement Learning - Đang trong quá trình hoàn thiện). Mỗi phần bao gồm các hình ảnh trực quan (GIF) và biểu đồ hiệu suất để giúp hiểu rõ hành vi của các thuật toán, trong điều kiện môi trường tĩnh và xác định của trò chơi 8 puzzle.
+Dự án này cài đặt một số thuật toán tìm kiếm Trí tuệ nhân tạo để giải bài toán 8 puzzle, bao gồm Tìm kiếm không có thông tin (Uninformed Search), Tìm kiếm có thông tin (Informed Search), Tìm kiếm cục bộ (Local Search), Tìm kiếm trong môi trường phức tạp (Complex Environments), Tìm kiếm có ràng buộc (CSPs), và Học tăng cường (Reinforcement Learning - Đang trong quá trình hoàn thiện). Mỗi phần bao gồm các hình ảnh trực quan (GIF) và biểu đồ hiệu suất để giúp hiểu rõ hành vi của các thuật toán, trong điều kiện môi trường tĩnh và xác định của trò chơi 8 puzzle.
 
 ## Cấu trúc Thư mục
 
@@ -29,7 +29,11 @@ Uninformed Search bao gồm các thuật toán như BFS, DFS, UCS, và IDDFS. D�
 
 ### Phân tích
 
-[Thêm phần phân tích của bạn về Tìm kiếm Không Thông Tin tại đây.]
+Uninformed Search là nhóm thuật toán tìm kiếm mù, tức không có sử dụng bất cứ thông tin đường đi nào khác ngoài cấu hình không gian trạng thái (cấu hình board) và tập hành động. Điều đó làm cho các thuật toán trong nhóm này phải duyệt qua toàn bộ không gian trạng thái (mở rộng tập tìm kiếm liên tục), thường đảm bảo tìm được giải pháp nếu tồn tại nhưng không chắc là giải pháp tối ưu nhất. Đặc biệt gặp vấn đề về hiệu suất trong không gian trạng thái 9! của bài toán 8 puzzle. Trong đó:
+- `BFS`: luôn tìm được lời giải ngắn nhất, hiệu quả với bài toán độ sâu thấp như trên ảnh gif ví dụ. Tuy nhiên không gian trạng thái tìm kiếm tương đối lớn và gặp khó khăn khi lời giải quá sâu.
+- `DFS`: tiết kiệm bộ nhớ hơn BFS do chỉ lưu trữ trạng thái của nhánh đang xét, đồng thời tìm được lời giải nhanh hơn BFS cho các nhánh sâu. Tuy nhiên thường không tìm ra được giải pháp tối ưu và phức tạp thời gian tăng cao nếu khám phá nhánh ở xa lời giải.
+- `IDDFS`: kết hợp ưu điểm tìm lời giải tối ưu và tiết kiệm bộ nhớ của BFS và DFS. Phù hợp với bài toán 8 puzzle có độ sâu trong khoảng 15-25 bước. Tuy nhiên do lặp lại duyệt trên từng độ sâu liên tục nên hiệu suất bị giảm.
+-  `UCS`: sử dụng chi phí tích lũy từ trạng thái ban đầu để quyết định mở rộng trạng thái nào tiếp theo. Nhưng ở bài toán 8 puzzle khi chi phí các bước đi đều bằng nhau thì UCS sẽ cho kết quả tương tự BFS. 
 
 ## Tìm kiếm Có Thông Tin (Informed Search)
 
@@ -49,7 +53,10 @@ Tìm kiếm Có Thông Tin bao gồm các thuật toán như A\*, Tìm kiếm T�
 
 ### Phân tích
 
-[Thêm phần phân tích của bạn về Tìm kiếm Có Thông Tin tại đây.]
+Informed Search là nhóm thuật toán sử dụng thông tin heuristic để ưu tiên duyệt các trạng thái được cho là có "triển vọng". Heuristic được dùng ở đây là tổng khoảng cách Manhattan của các ô so với vị trí đúng. Nhóm thuật toán này thể hiện khả năng giảm đáng kể số trạng thái cần duyệt so với Uninformed Search. Trong đó:
+- `A*`: với heuristic admissible (không vượt quá chi phí thực tế), A* đảm bảo tìm được giải pháp tối ưu trong bài toán 8 puzzle với thời gian nhanh nhất. Tuy nhiên thuật toán cũng gặp vấn đề về không gian bộ nhớ do yêu cầu lưu toàn bộ trạng thái đã duyệt cùng với đó là giảm hiệu suất khi lời giải ở sâu. 
+- `IDA*`: Sử dụng ít bộ nhớ hơn A* nhờ vào cơ chế duyệt sâu dần. Tuy nhiên tốn thời gian hơn vì phải duyệt lại nhiều lần nếu trạng thái ở sâu. 
+- `Greedy Best-First Search`: Nhanh hơn A* vì chỉ tập trung vào giá trị heuristic h(n). Đặc biệt tốt khi cần lời giải nhanh và nhất thiết tối ưu. Và điểm yếu cũng là không đảm bảo tìm được lời giải tối ưu nhất. 
 
 ## Tìm kiếm Cục Bộ (Local Search)
 
@@ -71,9 +78,12 @@ Tìm kiếm Cục Bộ bao gồm các thuật toán như Leo Đồi (Hill Climbi
 
 ### Phân tích
 
-[Thêm phần phân tích của bạn về Tìm kiếm Cục Bộ tại đây.]
+Local Search không duyệt toàn bộ không gian trạng thái vì vậy độ phức tạp không gian giảm mạnh so với hai thuật toán trước, chỉ tập trung cải thiện lời giải cục bộ và hiệu quả với không gian trạng thái quá lớn. Tuy nhiên vấn đề của nhóm này chính là lời giải thường không tối ưu toàn cục và dễ bị mắc kẹt ở cực trị cục bộ. Trong đó:
+- `SA`: Có khả năng vượt qua cực trị cục bộ bằng việc "làm nguội" và chọn các ước đi tạm thời kém hơn. Tuy nhiên hiện đang là thuật toán kém hiệu quả nhất với 8 puzzle, đặc biệt khi lời giải ở độ sâu cao. 
+- `GA`: Thử nghiệm nhiều trạng thái cùng lúc, tăng khả năng tìm ra lời giải. Tuy nhiên mất nhiều thời gian trong việc thử nghiệm và tối ưu tham số. Ngoài ra thời gian hội tụ của thuật toán cũng có thể rất lâu. 
+- `Nhóm thuật toán HillClimbing`: Nhanh và dễ triển khai. HillClimbing cơ bản dễ bị mắc kẹt ở cực trị địa phương. HillClimbing Steepest xem xét các trạng thái lân cân và tìm trạng thái tốt nhất tuy nhiên cũng dễ mắc kẹt trong bẫy cực trị cục bộ. HillClimbing Storchastic đem lại một tỉ lệ chọn các trạng thái không tốt bằng để tránh bẫy cực trị tuy nhiên đòi hỏi việc điều chỉnh tỉ lệ phù hợp. Vấn đề chung của nhóm trên là dù nhanh nhưng rất dễ bị mắc kẹt.
 
-## Tìm kiếm Phức Tạp
+## Tìm kiếm Phức Tạp (Complex Environments) 
 
 Tìm kiếm Phức Tạp bao gồm ba thuật toán nâng cao cùng với các hình ảnh trực quan và biểu đồ hiệu suất.
 
@@ -91,7 +101,10 @@ Tìm kiếm Phức Tạp bao gồm ba thuật toán nâng cao cùng với các h
 
 ### Phân tích
 
-[Thêm phần phân tích của bạn về Tìm kiếm Phức Tạp tại đây.]
+Search in Complex Environment là nhóm thuật toán xử lý các điều kiện thực tế như môi trường mù hoàn toàn hay môi trường có thông tin một phần. 8 puzzle là bài toán tĩnh, ít phù hợp hơn với nhóm này. Tuy nhiên chúng ta cũng có thể cài đặt một số biến thể để xem xét cách hoạt động. Trong đó:
+- `Search with no observation`: giả định môi trường khi agent không có bất kỳ thông tin gì, ngay cả vị trí của bản thân. Thực hiện cài đặt belief states ban đầu và tìm kiếm theo BFS về tập goal states. 
+- `Search with partial observation`: tương tự như thuật toán trên nhưng có được thêm một phần thông tin về môi trường. Ở đây là thông tin số 1 nằm ở tọa độ (0,0), giúp giảm đáng kể không gian trạng thái cần xét. 
+- `And Or Search`: Được sử dụng trong bài toán có nhiều nhánh lựa chọn và các tình huống không xác định. Nút Or đại diện cho các lựa chọn khác nhau mà agent có thể thực hiện, nút And đại diện cho điều kiện con phải đượ thỏa để đạt mục tiêu. Phù hợp cho bài toán lên kế hoạch phức tạp, tuy nhiên 8 puzzle là không gian tĩnh nên thuật toán không thể hiện được nhiều. 
 
 ## Bài toán Hài Hòa Ràng Buộc (CSPs)
 
@@ -111,7 +124,8 @@ CSPs bao gồm các thuật toán như Quay lui (Backtracking), Kiểm tra Tính
 
 ### Phân tích
 
-[Thêm phần phân tích của bạn về CSPs tại đây.]
+CSPs là nhóm thuật toán dựa trên việc giải quyết ràng buộc giữa các biến. Ta biến đổi bài toán giải 8 puzzle thành dạng bài tô màu đồ thị với các ràng buộc để cài đặt nhóm thuật toán này. Trong đó:
+- `Nhóm thuật toán Backtracking`: backtracking ngây thơ đạt hiệu quả rất tệ với 8 puzzle, mất rất nhiều thời gian tuy nhiên sẽ đảm bảo luôn tìm ra lời giải. Backtracking với contraints (ràng buộc) cho hiệu quả tốt hơn hẳn với ràng buộc các số tăng dần theo thứ tự ô. Trong khi Backtracking với lcv kết hợp contraints thì chưa đạt được hiệu quả cải tiến quá nhiều. 
 
 ## Học Tăng Cường
 
