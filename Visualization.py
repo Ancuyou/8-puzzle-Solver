@@ -654,14 +654,37 @@ class ThreadManager:
 
 
 def show_analysis_screen(screen, clock, WINDOW_WIDTH, WINDOW_HEIGHT):
-    # 1) Resize Pygame window lên lớn hơn
+    # Resize Pygame window
     ANALYSIS_W, ANALYSIS_H = 800, 700
     pygame.display.set_mode((ANALYSIS_W, ANALYSIS_H))
 
-    # 2) Đọc CSV và tính số liệu
-    df = pd.read_csv("results.csv", names=["algo", "time", "steps", "explored", "solved"])
+    # Read CSV and calculate statistics
+    try:
+        df = pd.read_csv("results.csv", names=["algo", "time", "steps", "explored", "solved"])
+        print("CSV loaded successfully. Shape:", df.shape)
+        print("Algorithms found:", df["algo"].unique())
+    except FileNotFoundError:
+        print("Error: results.csv not found in the current directory.")
+        screen.fill((255, 255, 255))
+        error_text = font_small.render("Error: results.csv not found", True, (255, 0, 0))
+        screen.blit(error_text, (20, 20))
+        pygame.display.flip()
+        time.sleep(2)
+        pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        return
+    except Exception as e:
+        print(f"Error reading CSV: {e}")
+        screen.fill((255, 255, 255))
+        error_text = font_small.render(f"Error reading CSV: {e}", True, (255, 0, 0))
+        screen.blit(error_text, (20, 20))
+        pygame.display.flip()
+        time.sleep(2)
+        pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+        return
+
     grouped = df.groupby("algo")
     algos = sorted(grouped.groups.keys())
+    print("Grouped algorithms:", algos)
 
     avg_time = grouped["time"].mean()
     avg_steps = grouped["steps"].mean()
@@ -670,27 +693,34 @@ def show_analysis_screen(screen, clock, WINDOW_WIDTH, WINDOW_HEIGHT):
 
     stats = {"Time (ms)": avg_time, "Steps": avg_steps, "Explored": avg_explored, "Success (%)": success_rate}
 
-    # 3) Vẽ 4 biểu đồ thành surfaces
+    # Check statistics
+    for title, series in stats.items():
+        print(f"{title} values:", series.to_dict())
+
+    # Create plots
     surfaces = []
     for title, series in stats.items():
-        fig = plt.figure(figsize=(3.5, 3))  # ~350×300 px
-        ax = fig.add_subplot(111)
-        ax.bar(algos, series[algos])
-        ax.set_title(title)
-        ax.tick_params(axis="x", rotation=45)
-        fig.tight_layout()
+        try:
+            fig = plt.figure(figsize=(3.5, 3))
+            ax = fig.add_subplot(111)
+            ax.bar(algos, series[algos])
+            ax.set_title(title)
+            ax.tick_params(axis="x", rotation=45)
+            fig.tight_layout()
 
-        canvas = FigureCanvasAgg(fig)
-        canvas.draw()
-        raw = canvas.tostring_rgb()
-        w, h = canvas.get_width_height()
-        surf = pygame.image.fromstring(raw, (w, h), "RGB")
-        surfaces.append(surf)
-        plt.close(fig)
+            canvas = FigureCanvasAgg(fig)
+            canvas.draw()
+            raw = canvas.tostring_rgb()
+            w, h = canvas.get_width_height()
+            surf = pygame.image.fromstring(raw, (w, h), "RGB")
+            surfaces.append(surf)
+            print(f"Plot created for {title}: {w}x{h} pixels")
+            plt.close(fig)
+        except Exception as e:
+            print(f"Error creating plot for {title}: {e}")
 
-    # 4) Hiển thị trong loop, 2×2 grid
-    positions = [(20, 20), (420, 20), (20, 360), (420, 360)]  # top-left  # top-right  # bottom-left  # bottom-right
-
+    # Display loop
+    positions = [(20, 20), (420, 20), (20, 360), (420, 360)]
     running = True
     while running:
         for ev in pygame.event.get():
@@ -700,14 +730,76 @@ def show_analysis_screen(screen, clock, WINDOW_WIDTH, WINDOW_HEIGHT):
                 running = False
 
         screen.fill((255, 255, 255))
-        for surf, pos in zip(surfaces, positions):
-            screen.blit(surf, pos)
+        for i, (surf, pos) in enumerate(zip(surfaces, positions)):
+            if surf:
+                screen.blit(surf, pos)
+            else:
+                print(f"Warning: Surface {i} is None")
+                error_text = font_small.render(f"Plot {i+1} failed", True, (255, 0, 0))
+                screen.blit(error_text, pos)
 
         pygame.display.flip()
         clock.tick(30)
 
-    # 5) Khôi phục lại kích thước cũ
+    # Restore window size
     pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
+
+
+# def show_analysis_screen(screen, clock, WINDOW_WIDTH, WINDOW_HEIGHT):
+#     # 1) Resize Pygame window lên lớn hơn
+#     ANALYSIS_W, ANALYSIS_H = 800, 700
+#     pygame.display.set_mode((ANALYSIS_W, ANALYSIS_H))
+
+#     # 2) Đọc CSV và tính số liệu
+#     df = pd.read_csv("results.csv", names=["algo", "time", "steps", "explored", "solved"])
+#     grouped = df.groupby("algo")
+#     algos = sorted(grouped.groups.keys())
+
+#     avg_time = grouped["time"].mean()
+#     avg_steps = grouped["steps"].mean()
+#     avg_explored = grouped["explored"].mean()
+#     success_rate = grouped["solved"].mean() * 100
+
+#     stats = {"Time (ms)": avg_time, "Steps": avg_steps, "Explored": avg_explored, "Success (%)": success_rate}
+
+#     # 3) Vẽ 4 biểu đồ thành surfaces
+#     surfaces = []
+#     for title, series in stats.items():
+#         fig = plt.figure(figsize=(3.5, 3))  # ~350×300 px
+#         ax = fig.add_subplot(111)
+#         ax.bar(algos, series[algos])
+#         ax.set_title(title)
+#         ax.tick_params(axis="x", rotation=45)
+#         fig.tight_layout()
+
+#         canvas = FigureCanvasAgg(fig)
+#         canvas.draw()
+#         raw = canvas.tostring_rgb()
+#         w, h = canvas.get_width_height()
+#         surf = pygame.image.fromstring(raw, (w, h), "RGB")
+#         surfaces.append(surf)
+#         plt.close(fig)
+
+#     # 4) Hiển thị trong loop, 2×2 grid
+#     positions = [(20, 20), (420, 20), (20, 360), (420, 360)]  # top-left  # top-right  # bottom-left  # bottom-right
+
+#     running = True
+#     while running:
+#         for ev in pygame.event.get():
+#             if ev.type == pygame.QUIT:
+#                 running = False
+#             elif ev.type == pygame.KEYDOWN and ev.key == pygame.K_ESCAPE:
+#                 running = False
+
+#         screen.fill((255, 255, 255))
+#         for surf, pos in zip(surfaces, positions):
+#             screen.blit(surf, pos)
+
+#         pygame.display.flip()
+#         clock.tick(30)
+
+#     # 5) Khôi phục lại kích thước cũ
+#     pygame.display.set_mode((WINDOW_WIDTH, WINDOW_HEIGHT))
 
 
 def main():

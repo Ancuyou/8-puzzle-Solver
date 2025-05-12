@@ -9,7 +9,7 @@ ALPHA = 0.1
 GAMMA = 0.9
 EPSILON = 0.3
 Q_table = {}
-Q_TABLE_FILE = "q_table.pkl"
+Q_TABLE_FILE = "q_table_first.pkl"
 GRID = 3
 final_state = [[1, 2, 3], [4, 5, 6], [7, 8, 0]]
 
@@ -190,7 +190,7 @@ def q_learning(state, episodes=2000, max_steps=200):
     elapsed_ms = (time.perf_counter() - t0) * 1000
     with open("results.csv", "a", newline="") as f:
         writer = csv.writer(f)
-        writer.writerow(["QLearning", f"{elapsed_ms:.3f}", len(solution) - 1, 0, solved_flag])  # explorer count (tabular Q-Learning ko track)
+        writer.writerow(["QLearning_first", f"{elapsed_ms:.3f}", len(solution) - 1, 0, solved_flag])  # explorer count (tabular Q-Learning ko track)
     nodes = solution
     states = [node.state for node in nodes]
     return states, elapsed_ms
