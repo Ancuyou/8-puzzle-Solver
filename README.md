@@ -205,6 +205,7 @@ RL huấn luyện agent qua phần thưởng, phù hợp với bài toán độn
 - Sử dụng epsilon giảm dần theo từng episode với các tham số: EPSILON_START, EPSILON_END, và EPSILON_DECAY. Điều này khuyến khích việc thăm dò nhiều hơn ở giai đoạn đầu và tập trung khai thác (exploit) ở giai đoạn cuối.
 - Chạy 50,000 episode, mỗi episode có tối đa 1,000 bước so với 2,000 episode, mỗi episode có tối đa 200 bước của Q-learning-first
 - Sử dụng trạng thái ban đầu hoặc một trạng thái nhiễu với tối đa 50 bước so với 5 bước của Q-learning-first
+
 Các thay đổi trên nhìn chung đã giúp cho kết quả của Q-learning tốt hơn, tuy nhiên vẫn có thể tối ưu thêm được nữa trong thời gian tới. 
 
 ## Hướng dẫn Cài đặt và Sử dụng
