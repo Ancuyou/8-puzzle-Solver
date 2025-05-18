@@ -917,7 +917,7 @@ def main():
                     [[1, 2, 3], [4, 5, 6], [7, 8, 0]],
                     [[1, 2, 3], [4, 5, 6], [0, 7, 8]],
                 ]
-                from logic import search_with_partial_observation
+                from Logic import search_with_partial_observation
 
                 steps, time_solved = search_with_partial_observation(start_states, goal_states)
                 partial_belief_interface(steps, goal_states, time_solved)
@@ -933,7 +933,7 @@ def main():
                     [[1, 2, 3], [4, 5, 6], [7, 8, 0]],
                     [[1, 2, 3], [4, 5, 6], [0, 7, 8]],
                 ]
-                from logic import search_with_no_observation
+                from Logic import search_with_no_observation
 
                 steps, time_solved = search_with_no_observation(start_states, goal_states)
                 partial_belief_interface(steps, goal_states, time_solved)
