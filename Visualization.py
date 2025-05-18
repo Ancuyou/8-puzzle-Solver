@@ -9,7 +9,7 @@ import pygame
 from matplotlib.backends.backend_agg import FigureCanvasAgg
 
 import qlearning
-from logic import solution_time
+from Logic import solution_time
 
 WINDOW_WIDTH = 640
 WINDOW_HEIGHT = 600
